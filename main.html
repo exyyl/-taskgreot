@@ -37,47 +37,6 @@
             position: relative;
         }
 
-        /* Фоновые элементы */
-        .bg-effects {
-            position: fixed;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            overflow: hidden;
-        }
-
-        .bg-effect {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(60px);
-            opacity: 0.1;
-            animation: float 20s infinite ease-in-out;
-        }
-
-        .effect-1 {
-            width: 300px;
-            height: 300px;
-            background: var(--primary);
-            top: -100px;
-            right: -100px;
-        }
-
-        .effect-2 {
-            width: 400px;
-            height: 400px;
-            background: var(--accent);
-            bottom: -150px;
-            left: -100px;
-            animation-delay: 10s;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            33% { transform: translate(30px, -40px) scale(1.05); }
-            66% { transform: translate(-20px, 20px) scale(0.95); }
-        }
-
-        /* Контейнер */
         .container {
             max-width: 100%;
             height: 100vh;
@@ -109,7 +68,6 @@
             font-size: 1rem;
         }
 
-        /* Стиль стекла */
         .glass-card {
             background: var(--glass);
             backdrop-filter: blur(20px);
@@ -119,7 +77,6 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
         }
 
-        /* Навигация */
         .tab-navigation {
             position: fixed;
             bottom: 20px;
@@ -161,7 +118,6 @@
             color: white;
         }
 
-        /* Контент */
         .tab-content {
             display: none;
             flex: 1;
@@ -432,7 +388,6 @@
             transform: translateX(0);
         }
 
-        /* Адаптивность */
         @media (max-width: 768px) {
             .logo {
                 font-size: 2.5rem;
@@ -457,11 +412,6 @@
     </style>
 </head>
 <body>
-    <div class="bg-effects">
-        <div class="bg-effect effect-1"></div>
-        <div class="bg-effect effect-2"></div>
-    </div>
-
     <div class="container">
         <header>
             <h1 class="logo">Task Greot</h1>
@@ -487,15 +437,6 @@
                     <p class="task-desc">Протестируйте пользовательский интерфейс приложения</p>
                     <div class="task-footer">
                         <div class="task-reward">+180 баллов</div>
-                        <button class="task-action">Начать</button>
-                    </div>
-                </div>
-                <div class="task-card glass-card">
-                    <div class="task-icon"><i class="fas fa-chart-line"></i></div>
-                    <h3 class="task-title">Анализ данных</h3>
-                    <p class="task-desc">Проанализируйте данные и составьте краткий отчет</p>
-                    <div class="task-footer">
-                        <div class="task-reward">+320 баллов</div>
                         <button class="task-action">Начать</button>
                     </div>
                 </div>
@@ -526,13 +467,6 @@
                     </div>
                     <div class="faq-answer">Перейдите в профиль и нажмите кнопку "Вывести средства".</div>
                 </div>
-                <div class="faq-item glass-card" onclick="toggleFaq(this)">
-                    <div class="faq-question">
-                        <span>Какие задания самые популярные?</span>
-                        <i class="fas fa-chevron-down"></i>
-                    </div>
-                    <div class="faq-answer">Наиболее востребованы задачи по анализу данных и тестированию интерфейсов.</div>
-                </div>
             </div>
         </div>
 
@@ -541,7 +475,7 @@
             <div class="profile-header glass-card">
                 <div class="avatar">
                     <i id="avatar-icon" class="fas fa-user"></i>
-                    <img id="avatar-img" style="display: none;" alt="Аватар" crossorigin="anonymous">
+                    <img id="avatar-img" style="display: none;" alt="Аватар">
                 </div>
                 <div class="profile-info">
                     <h2 id="user-name">Загрузка...</h2>
@@ -566,21 +500,16 @@
                 <button class="withdraw-btn" id="withdraw-btn">
                     <i class="fas fa-exchange-alt"></i> Вывести средства
                 </button>
+                <div style="margin-top: 15px; font-size: 0.8rem; color: var(--text-secondary);">
+                    <i class="fas fa-info-circle"></i> Баланс обновляется каждые 30 секунд
+                </div>
             </div>
 
             <h2 style="margin-bottom: 16px; font-size: 1.5rem;">Статистика</h2>
             <div class="stats-grid">
                 <div class="stat-card glass-card">
                     <div class="stat-value" id="stat-tasks">0</div>
-                    <div class="stat-label">Выполнено заданий</div>
-                </div>
-                <div class="stat-card glass-card">
-                    <div class="stat-value" id="stat-quality">98%</div>
-                    <div class="stat-label">Качество работы</div>
-                </div>
-                <div class="stat-card glass-card">
-                    <div class="stat-value" id="stat-active">0</div>
-                    <div class="stat-label">Активных заданий</div>
+                    <div class="stat-label">Заданий выполнено</div>
                 </div>
                 <div class="stat-card glass-card">
                     <div class="stat-value" id="stat-streak">0</div>
@@ -612,6 +541,18 @@
     <script>
         // ==================== КОНФИГУРАЦИЯ ====================
         const CONFIG = {
+            // Прокси для обхода CORS (публичные прокси-сервисы)
+            PROXY_SERVICES: [
+                // Вариант 1: CORS Anywhere (требуется временный доступ)
+                'https://cors-anywhere.herokuapp.com/',
+                // Вариант 2: AllOrigins
+                'https://api.allorigins.win/raw?url=',
+                // Вариант 3: Cors Proxy
+                'https://corsproxy.io/?',
+                // Вариант 4: Свой GitHub Pages прокси (создайте файл proxy.html в репозитории)
+                ''
+            ],
+            
             BD_FILE_URL: 'https://raw.githubusercontent.com/exyyl/-taskgreot/main/bd.txt',
             UPDATE_INTERVAL: 30000, // 30 секунд
             POINT_TO_RUB: 1
@@ -628,17 +569,9 @@
             if (typeof Telegram !== 'undefined' && Telegram.WebApp) {
                 const webApp = Telegram.WebApp;
                 
-                // Инициализируем приложение
                 webApp.ready();
                 webApp.expand();
                 
-                // Включаем кнопку "Назад"
-                webApp.BackButton.show();
-                webApp.BackButton.onClick(() => {
-                    webApp.close();
-                });
-                
-                // Получаем данные пользователя
                 const user = webApp.initDataUnsafe?.user;
                 
                 if (user) {
@@ -653,26 +586,22 @@
                         auth_date: user.auth_date || Math.floor(Date.now() / 1000)
                     };
                     
-                    console.log('Текущий пользователь:', currentUser);
+                    console.log('Текущий пользователь ID:', currentUser.id);
                     return true;
-                } else {
-                    console.log('Данные пользователя не получены');
                 }
-            } else {
-                console.log('Telegram Web App не доступен, запускаем демо-режим');
             }
             
-            // Демо-режим для тестирования
+            // Демо-режим
             currentUser = {
-                id: 123456789, // Замените на ваш реальный ID из Telegram
-                first_name: 'Иван',
-                last_name: 'Иванов',
-                username: 'ivanov',
+                id: 7621683704, // Ваш реальный ID из Telegram
+                first_name: 'Example',
+                last_name: 'User',
+                username: 'exyld',
                 photo_url: null,
                 auth_date: Math.floor(Date.now() / 1000)
             };
             
-            console.log('Используются демо-данные:', currentUser);
+            console.log('Используются демо-данные');
             return false;
         }
 
@@ -682,58 +611,75 @@
             const avatarImg = document.getElementById('avatar-img');
             
             if (!currentUser) {
-                console.log('Пользователь не определен для загрузки аватара');
                 avatarIcon.style.display = 'flex';
                 avatarImg.style.display = 'none';
                 return;
             }
             
-            console.log('Загрузка аватара для пользователя:', currentUser);
+            console.log('Загрузка аватара для пользователя:', currentUser.first_name);
             
-            if (currentUser.photo_url) {
-                console.log('URL аватара:', currentUser.photo_url);
-                
-                // Создаем временное изображение для проверки
-                const tempImg = new Image();
-                tempImg.onload = function() {
-                    console.log('Аватар успешно загружен');
-                    avatarIcon.style.display = 'none';
-                    avatarImg.style.display = 'block';
-                    avatarImg.src = currentUser.photo_url;
-                    avatarImg.onerror = function() {
-                        console.log('Ошибка загрузки аватара, показываем инициалы');
-                        showInitials();
-                    };
-                };
-                
-                tempImg.onerror = function() {
-                    console.log('Аватар не доступен, показываем инициалы');
-                    showInitials();
-                };
-                
-                tempImg.src = currentUser.photo_url;
+            // Всегда показываем инициалы, т.к. аватарки Telegram блокируются CORS
+            avatarIcon.style.display = 'flex';
+            avatarImg.style.display = 'none';
+            
+            const firstName = currentUser.first_name || '';
+            const lastName = currentUser.last_name || '';
+            const initials = (firstName.charAt(0) + lastName.charAt(0)).toUpperCase();
+            
+            if (initials.trim()) {
+                avatarIcon.textContent = initials;
+                avatarIcon.style.fontSize = '1.8rem';
+                avatarIcon.style.fontWeight = '600';
             } else {
-                console.log('Аватар не указан, показываем инициалы');
-                showInitials();
+                avatarIcon.className = 'fas fa-user';
+                avatarIcon.style.fontSize = '2rem';
+            }
+        }
+
+        // ==================== ПРОКСИ ДЛЯ ОБХОДА CORS ====================
+        async function fetchWithProxy(url) {
+            // Пробуем прямой запрос (если CORS позволит)
+            try {
+                const response = await fetch(url, {
+                    method: 'GET',
+                    mode: 'cors',
+                    cache: 'no-cache',
+                    headers: {
+                        'Accept': 'text/plain'
+                    }
+                });
+                
+                if (response.ok) {
+                    console.log('Прямой запрос успешен');
+                    return await response.text();
+                }
+            } catch (directError) {
+                console.log('Прямой запрос не удался:', directError.message);
             }
             
-            function showInitials() {
-                avatarIcon.style.display = 'flex';
-                avatarImg.style.display = 'none';
-                
-                const firstName = currentUser.first_name || '';
-                const lastName = currentUser.last_name || '';
-                const initials = (firstName.charAt(0) + lastName.charAt(0)).toUpperCase();
-                
-                if (initials.trim()) {
-                    avatarIcon.textContent = initials;
-                    avatarIcon.style.fontSize = '1.8rem';
-                    avatarIcon.style.fontWeight = '600';
-                } else {
-                    avatarIcon.className = 'fas fa-user';
-                    avatarIcon.style.fontSize = '2rem';
+            // Пробуем через прокси
+            for (const proxy of CONFIG.PROXY_SERVICES) {
+                try {
+                    if (!proxy) continue; // Пропускаем пустые прокси
+                    
+                    const proxyUrl = proxy + encodeURIComponent(url);
+                    console.log('Пробуем прокси:', proxyUrl.substring(0, 50) + '...');
+                    
+                    const response = await fetch(proxyUrl, {
+                        method: 'GET',
+                        cache: 'no-cache'
+                    });
+                    
+                    if (response.ok) {
+                        console.log('Прокси успешен:', proxy);
+                        return await response.text();
+                    }
+                } catch (proxyError) {
+                    console.log('Прокси не удался:', proxy, proxyError.message);
                 }
             }
+            
+            throw new Error('Все прокси не сработали');
         }
 
         // ==================== ЗАГРУЗКА ДАННЫХ ИЗ ФАЙЛА ====================
@@ -743,33 +689,13 @@
                 return null;
             }
             
-            const userId = currentUser.id;
-            console.log('Загрузка данных для пользователя ID:', userId);
+            console.log('Загрузка данных для пользователя ID:', currentUser.id);
             
             try {
-                // Добавляем временную метку для предотвращения кэширования
-                const timestamp = Date.now();
-                const url = `${CONFIG.BD_FILE_URL}?t=${timestamp}`;
+                // Пробуем загрузить через прокси
+                const text = await fetchWithProxy(CONFIG.BD_FILE_URL);
                 
-                console.log('Запрос к URL:', url);
-                
-                const response = await fetch(url, {
-                    method: 'GET',
-                    mode: 'cors',
-                    cache: 'no-cache',
-                    headers: {
-                        'Accept': 'text/plain',
-                        'Cache-Control': 'no-cache'
-                    }
-                });
-                
-                if (!response.ok) {
-                    console.error('Ошибка HTTP:', response.status, response.statusText);
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
-                const text = await response.text();
-                console.log('Содержимое файла:', text);
+                console.log('Содержимое файла получено');
                 
                 if (!text.trim()) {
                     console.log('Файл пуст');
@@ -783,44 +709,22 @@
                     const line = lines[i].trim();
                     if (!line) continue;
                     
-                    console.log(`Обработка строки ${i}:`, line);
+                    console.log(`Обработка строки ${i + 1}:`, line);
                     
-                    // Пробуем разные форматы
-                    // Формат 1: "ID — БАЛАНС — УРОВЕНЬ" (с длинным тире)
-                    // Формат 2: "ID - БАЛАНС - УРОВЕНЬ" (с коротким тире)
-                    // Формат 3: "ID БАЛАНС УРОВЕНЬ" (пробелы)
+                    // Ищем ID пользователя в строке
+                    // Формат: ID — БАЛАНС — УРОВЕНЬ
+                    const userIdPattern = new RegExp(`^${currentUser.id}\\s*[—\\-]\\s*(\\d+)\\s*[—\\-]\\s*(\\w+)`, 'i');
+                    const match = line.match(userIdPattern);
                     
-                    let parts;
-                    
-                    // Пробуем с длинным тире
-                    if (line.includes('—')) {
-                        parts = line.split('—').map(p => p.trim());
-                    }
-                    // Пробуем с коротким тире
-                    else if (line.includes('-')) {
-                        parts = line.split('-').map(p => p.trim());
-                    }
-                    // Пробуем с пробелами
-                    else {
-                        parts = line.split(/\s+/);
-                    }
-                    
-                    console.log('Разделенные части:', parts);
-                    
-                    if (parts.length >= 3) {
-                        const fileUserId = parseInt(parts[0]);
-                        const balance = parseInt(parts[1]);
-                        const level = parts[2].toLowerCase();
+                    if (match) {
+                        console.log('Найдено совпадение!');
+                        const balance = parseInt(match[1]);
+                        const level = match[2].toLowerCase();
                         
-                        console.log(`Сравниваем: ${fileUserId} (из файла) с ${userId} (текущий)`);
-                        
-                        if (fileUserId === userId) {
-                            console.log('Найдено совпадение!', { balance, level });
-                            return {
-                                balance: isNaN(balance) ? 0 : balance,
-                                level: level || 'обычный'
-                            };
-                        }
+                        return {
+                            balance: isNaN(balance) ? 0 : balance,
+                            level: level || 'обычный'
+                        };
                     }
                 }
                 
@@ -828,67 +732,79 @@
                 return null;
                 
             } catch (error) {
-                console.error('Ошибка загрузки данных:', error);
+                console.error('Ошибка загрузки данных:', error.message);
                 return null;
             }
         }
 
         // ==================== ОБНОВЛЕНИЕ БАЛАНСА ====================
-        async function updateBalance() {
+        async function updateBalance(showNotification = false) {
             console.log('Обновление баланса...');
             
             const loader = document.getElementById('balance-loader');
             if (loader) loader.style.display = 'inline-block';
             
             try {
-                // 1. Пробуем загрузить из файла
+                // Пробуем загрузить из файла
                 const fileData = await loadBalanceData();
                 
                 let balance = 0;
                 let level = 'обычный';
+                let source = 'localStorage';
                 
                 if (fileData) {
                     console.log('Используем данные из файла:', fileData);
                     balance = fileData.balance;
                     level = fileData.level;
+                    source = 'GitHub файл';
                 } else {
-                    console.log('Файл не найден или пользователь не найден, используем localStorage');
+                    console.log('Файл не найден, используем localStorage');
                     
-                    // 2. Пробуем загрузить из localStorage
                     const savedData = localStorage.getItem(`taskgreot_user_${currentUser?.id}`);
                     if (savedData) {
                         try {
                             const data = JSON.parse(savedData);
                             balance = data.balance || 0;
                             level = data.level || 'обычный';
-                            console.log('Используем данные из localStorage:', data);
                         } catch (e) {
                             console.error('Ошибка парсинга localStorage:', e);
                         }
                     }
                 }
                 
-                // 3. Обновляем интерфейс
-                console.log('Устанавливаем баланс:', balance);
-                
+                // Обновляем интерфейс
                 document.getElementById('balance-value').textContent = balance.toLocaleString('ru-RU');
                 document.getElementById('balance-rub').textContent = (balance * CONFIG.POINT_TO_RUB).toLocaleString('ru-RU');
                 document.getElementById('user-level').textContent = level;
                 
-                // 4. Сохраняем в localStorage для быстрого доступа
+                // Обновляем источник данных в интерфейсе
+                const sourceElement = document.querySelector('.balance-subtext + div');
+                if (sourceElement) {
+                    sourceElement.innerHTML = `<i class="fas fa-info-circle"></i> Данные: ${source} | Обновлено: ${new Date().toLocaleTimeString('ru-RU', {hour: '2-digit', minute:'2-digit'})}`;
+                }
+                
+                // Сохраняем в localStorage
                 if (currentUser?.id) {
                     localStorage.setItem(`taskgreot_user_${currentUser.id}`, JSON.stringify({
                         balance,
                         level,
-                        updated: Date.now()
+                        updated: Date.now(),
+                        source: source
                     }));
                 }
                 
-                console.log('Баланс успешно обновлен');
+                console.log('Баланс успешно обновлен:', balance, '(', source, ')');
+                
+                if (showNotification && source === 'GitHub файл') {
+                    showNotificationMessage('Баланс обновлен из GitHub', 2000);
+                }
+                
+                return balance;
                 
             } catch (error) {
                 console.error('Ошибка при обновлении баланса:', error);
-                showNotification('Ошибка загрузки баланса', 3000);
+                showNotificationMessage('Ошибка загрузки данных', 3000);
+                return 0;
             } finally {
                 if (loader) loader.style.display = 'none';
             }
@@ -896,12 +812,7 @@
 
         // ==================== ОБНОВЛЕНИЕ ПРОФИЛЯ ====================
         function updateProfile() {
-            console.log('Обновление профиля...');
-            
-            if (!currentUser) {
-                console.log('Пользователь не определен');
-                return;
-            }
+            if (!currentUser) return;
             
             // Имя
             const fullName = `${currentUser.first_name || ''} ${currentUser.last_name || ''}`.trim();
@@ -917,11 +828,7 @@
             const joinDateEl = document.getElementById('user-join-date');
             if (joinDateEl && currentUser.auth_date) {
                 const joinDate = new Date(currentUser.auth_date * 1000);
-                joinDateEl.textContent = `Участник с ${joinDate.toLocaleDateString('ru-RU', {
-                    day: 'numeric',
-                    month: 'long',
-                    year: 'numeric'
-                })}`;
+                joinDateEl.textContent = `Участник с ${joinDate.toLocaleDateString('ru-RU')}`;
             }
             
             // Аватар
@@ -963,7 +870,7 @@
         }
 
         // ==================== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ====================
-        function showNotification(text, duration = 3000) {
+        function showNotificationMessage(text, duration = 3000) {
             const notification = document.getElementById('notification');
             const textEl = document.getElementById('notification-text');
             
@@ -996,7 +903,6 @@
                 btn.addEventListener('click', () => {
                     const tabId = btn.dataset.tab;
                     
-                    // Обновляем активные элементы
                     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
                     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
                     
@@ -1007,13 +913,12 @@
                     if (tabId === 'profile-tab') {
                         console.log('Переход на вкладку профиля');
                         
-                        // Останавливаем предыдущий интервал
                         if (balanceUpdateInterval) {
                             clearInterval(balanceUpdateInterval);
                         }
                         
                         // Немедленно обновляем баланс
-                        updateBalance();
+                        updateBalance(true);
                         
                         // Запускаем периодическое обновление
                         balanceUpdateInterval = setInterval(() => {
@@ -1021,7 +926,6 @@
                             updateBalance();
                         }, CONFIG.UPDATE_INTERVAL);
                     } else {
-                        // Останавливаем обновление при уходе из профиля
                         if (balanceUpdateInterval) {
                             clearInterval(balanceUpdateInterval);
                             balanceUpdateInterval = null;
@@ -1040,32 +944,28 @@
                     btn.disabled = true;
                     btn.textContent = 'Выполняется...';
                     
-                    // Имитация выполнения
                     setTimeout(async () => {
-                        // Обновляем баланс
                         const currentBalance = parseInt(document.getElementById('balance-value').textContent.replace(/\D/g, '')) || 0;
                         const newBalance = currentBalance + reward;
                         
-                        // Сохраняем в localStorage
                         if (currentUser?.id) {
                             localStorage.setItem(`taskgreot_user_${currentUser.id}`, JSON.stringify({
                                 balance: newBalance,
                                 level: 'обычный',
-                                updated: Date.now()
+                                updated: Date.now(),
+                                source: 'localStorage'
                             }));
                         }
                         
-                        // Обновляем интерфейс
                         await updateBalance();
                         
-                        // Обновляем статистику
                         const tasksCount = parseInt(document.getElementById('stat-tasks').textContent) || 0;
                         document.getElementById('stat-tasks').textContent = tasksCount + 1;
                         
                         btn.textContent = 'Выполнено!';
                         btn.style.background = 'linear-gradient(135deg, var(--success), #34D399)';
                         
-                        showNotification(`Задание выполнено! +${reward} баллов`, 3000);
+                        showNotificationMessage(`Задание выполнено! +${reward} баллов`, 3000);
                         
                         setTimeout(() => {
                             btn.textContent = 'Начать';
@@ -1079,13 +979,13 @@
             // 5. Кнопка вывода средств
             document.getElementById('withdraw-btn').addEventListener('click', () => {
                 const balance = document.getElementById('balance-value').textContent;
-                showNotification(`Запрос на вывод ${balance} баллов отправлен`, 3000);
+                showNotificationMessage(`Запрос на вывод ${balance} баллов отправлен`, 3000);
             });
             
             // 6. Приветствие
             setTimeout(() => {
                 if (currentUser?.first_name) {
-                    showNotification(`Добро пожаловать, ${currentUser.first_name}!`, 3000);
+                    showNotificationMessage(`Добро пожаловать, ${currentUser.first_name}!`, 3000);
                 }
             }, 500);
             
@@ -1094,6 +994,17 @@
             document.addEventListener('touchmove', (e) => {
                 if (e.scale !== 1) e.preventDefault();
             }, { passive: false });
+            
+            // 8. Показываем инструкцию
+            console.log(`
+            ==================== ИНСТРУКЦИЯ ====================
+            1. Ваш Telegram ID: ${currentUser?.id || 'не определен'}
+            2. Добавьте в файл bd.txt строку:
+               ${currentUser?.id || 'ВАШ_ID'} — 100 — обычный
+            3. Сохраните файл на GitHub
+            4. Баланс обновится автоматически через 30 секунд
+            =====================================================
+            `);
         });
     </script>
 </body>
