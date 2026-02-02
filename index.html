@@ -15,6 +15,7 @@
             --success: #10B981;
             --danger: #EF4444;
             --warning: #F59E0B;
+            --info: #3B82F6;
             --glass: rgba(255, 255, 255, 0.08);
             --glass-border: rgba(255, 255, 255, 0.12);
             --dark-bg: #0F172A;
@@ -26,6 +27,7 @@
             --gradient-primary: linear-gradient(135deg, var(--primary), var(--accent));
             --gradient-success: linear-gradient(135deg, var(--success), #34D399);
             --gradient-warning: linear-gradient(135deg, var(--warning), #FBBF24);
+            --gradient-danger: linear-gradient(135deg, var(--danger), #F87171);
         }
 
         * {
@@ -469,6 +471,217 @@
             font-weight: 500;
         }
 
+        /* Модальное окно вывода */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: var(--glass);
+            backdrop-filter: blur(25px) saturate(180%);
+            border-radius: 24px;
+            border: 1px solid var(--glass-border);
+            padding: 32px;
+            width: 90%;
+            max-width: 450px;
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .modal-header h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 8px;
+        }
+
+        .modal-header p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .withdraw-options {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .withdraw-option {
+            background: rgba(255, 255, 255, 0.03);
+            border: 2px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .withdraw-option:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .withdraw-option.active {
+            background: rgba(139, 92, 246, 0.1);
+            border-color: var(--primary);
+        }
+
+        .option-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .sbp-icon {
+            background: linear-gradient(135deg, #1E88E5, #0D47A1);
+        }
+
+        .stars-icon {
+            background: linear-gradient(135deg, #FF6B6B, #FF5252);
+        }
+
+        .crypto-icon {
+            background: linear-gradient(135deg, #FFD93D, #FFB800);
+        }
+
+        .option-info h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 4px;
+        }
+
+        .option-info p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 6px;
+        }
+
+        .option-min {
+            color: var(--warning);
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 14px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid var(--glass-border);
+            border-radius: 12px;
+            color: white;
+            font-size: 1rem;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .withdraw-submit {
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .withdraw-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(139, 92, 246, 0.4);
+        }
+
+        .withdraw-submit:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: var(--text-tertiary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .close-modal:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+        }
+
         /* Информация */
         .info-section {
             padding: 28px;
@@ -610,6 +823,11 @@
             .task-card, .profile-header, .balance-card, .info-section {
                 padding: 20px;
             }
+            
+            .modal-content {
+                padding: 24px;
+                width: 95%;
+            }
         }
 
         @media (max-width: 480px) {
@@ -628,6 +846,17 @@
             
             .stat-value {
                 font-size: 1.8rem;
+            }
+            
+            .withdraw-option {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .option-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 1.5rem;
             }
         }
 
@@ -774,6 +1003,72 @@
         </div>
     </div>
 
+    <!-- Модальное окно вывода -->
+    <div class="modal-overlay" id="withdraw-modal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeWithdrawModal()">
+                <i class="fas fa-times"></i>
+            </button>
+            
+            <div class="modal-header">
+                <h2>Вывод средств</h2>
+                <p>Выберите удобный способ вывода</p>
+            </div>
+
+            <div class="withdraw-options">
+                <div class="withdraw-option" data-method="sbp" data-min="50">
+                    <div class="option-icon sbp-icon">
+                        <i class="fas fa-university"></i>
+                    </div>
+                    <div class="option-info">
+                        <h3>СБП (Быстрый перевод)</h3>
+                        <p>Мгновенный перевод на карту любого банка РФ</p>
+                        <p class="option-min">Минимум: 50 баллов</p>
+                    </div>
+                </div>
+
+                <div class="withdraw-option" data-method="stars" data-min="75">
+                    <div class="option-icon stars-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <div class="option-info">
+                        <h3>Stars.TH</h3>
+                        <p>Вывод в Stars.TH (1,5 балла = 1 звезда)</p>
+                        <p class="option-min">Минимум: 75 баллов</p>
+                    </div>
+                </div>
+
+                <div class="withdraw-option" data-method="crypto" data-min="100">
+                    <div class="option-icon crypto-icon">
+                        <i class="fas fa-bitcoin"></i>
+                    </div>
+                    <div class="option-info">
+                        <h3>Crypto Bot</h3>
+                        <p>Вывод через криптовалютного бота</p>
+                        <p class="option-min">Минимум: 100 баллов</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Форма для СБП -->
+            <div id="sbp-form" style="display: none;">
+                <div class="input-group">
+                    <label for="bank-name">Банк получателя</label>
+                    <input type="text" id="bank-name" placeholder="Например: Сбербанк, Тинькофф">
+                </div>
+                <div class="input-group">
+                    <label for="card-number">Номер карты</label>
+                    <input type="text" id="card-number" placeholder="0000 0000 0000 0000">
+                </div>
+            </div>
+
+            <!-- Кнопка подтверждения -->
+            <button class="withdraw-submit" id="submit-withdraw" disabled>
+                Подтвердить вывод
+            </button>
+        </div>
+    </div>
+
     <nav class="tab-navigation">
         <button class="tab-btn active" data-tab="tasks-tab">
             <i class="fas fa-tasks"></i>
@@ -822,11 +1117,13 @@
         let currentUser = null;
         let balanceUpdateInterval = null;
         let botTokenLoaded = false;
+        let selectedWithdrawMethod = null;
+        let lastWithdrawTime = localStorage.getItem('last_withdraw_time');
+        let totalTasksTaken = parseInt(localStorage.getItem('total_tasks_taken')) || 0;
 
         // ==================== ЗАГРУЗКА ТОКЕНА ИЗ ФАЙЛА ====================
         async function loadBotToken() {
             try {
-                // Пробуем загрузить токен из файла
                 const response = await fetch(CONFIG.TOKEN_FILE_URL, {
                     method: 'GET',
                     cache: 'no-cache',
@@ -845,7 +1142,6 @@
                     }
                 }
                 
-                // Пробуем альтернативные пути
                 return await tryAlternativeTokenPaths();
                 
             } catch (error) {
@@ -887,7 +1183,6 @@
 
         // ==================== ИНИЦИАЛИЗАЦИЯ ТЕЛЕГРАМ ====================
         async function initTelegram() {
-            // Сначала загружаем токен
             await loadBotToken();
             
             if (typeof Telegram !== 'undefined' && Telegram.WebApp) {
@@ -911,7 +1206,7 @@
                 }
             }
             
-            // Демо-режим (если не в Telegram)
+            // Демо-режим
             currentUser = {
                 id: Math.floor(Math.random() * 1000000000),
                 first_name: 'Гость',
@@ -960,8 +1255,8 @@
                         reply_markup: {
                             inline_keyboard: [[
                                 {
-                                    text: '✅ Получить инструкцию',
-                                    callback_data: `get_instructions_${taskData.id}`
+                                    text: '💬 Тех поддержка',
+                                    url: 'https://t.me/TaskGreotSupport'
                                 }
                             ]]
                         }
@@ -1020,8 +1315,8 @@ ${currentUser.username ? `🔗 <b>Username:</b> @${currentUser.username}\n` : ''
                         reply_markup: {
                             inline_keyboard: [[
                                 {
-                                    text: '📋 Просмотреть задание',
-                                    url: 'https://example.com' // Замените на нужную ссылку
+                                    text: '📨 Отправить сообщение',
+                                    url: 'https://t.me/taskGreot_bot/sootoadmin'
                                 },
                                 {
                                     text: '📊 Статистика пользователя',
@@ -1041,12 +1336,220 @@ ${currentUser.username ? `🔗 <b>Username:</b> @${currentUser.username}\n` : ''
             }
         }
 
+        // ==================== ОТПРАВКА УВЕДОМЛЕНИЯ О ВЫВОДЕ ====================
+        async function sendWithdrawNotification(amount, method, details = '') {
+            if (!botTokenLoaded || !CONFIG.TELEGRAM_BOT_TOKEN) {
+                return false;
+            }
+            
+            try {
+                const now = new Date();
+                const timeString = now.toLocaleTimeString('ru-RU', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                const dateString = now.toLocaleDateString('ru-RU');
+                
+                // Сообщение пользователю
+                const userMessage = `💰 <b>Заявка на вывод создана!</b>
+
+💎 <b>Сумма:</b> ${amount} баллов
+🔄 <b>Метод:</b> ${getMethodName(method)}
+⏰ <b>Время:</b> ${timeString}
+📅 <b>Дата:</b> ${dateString}
+
+✅ <i>Заявка будет обработана в течение 24 часов.</i>`;
+
+                await fetch(`https://api.telegram.org/bot${CONFIG.TELEGRAM_BOT_TOKEN}/sendMessage`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        chat_id: currentUser.id,
+                        text: userMessage,
+                        parse_mode: 'HTML'
+                    })
+                });
+
+                // Сообщение в группу
+                const userLink = currentUser.username 
+                    ? `<a href="https://t.me/${currentUser.username}">${currentUser.first_name} ${currentUser.last_name}</a>`
+                    : `${currentUser.first_name} ${currentUser.last_name}`;
+                
+                const groupMessage = `💰 <b>Новая заявка на вывод!</b>
+
+👤 <b>Пользователь:</b> ${userLink}
+${currentUser.username ? `🔗 <b>Username:</b> @${currentUser.username}\n` : ''}
+💎 <b>Сумма:</b> ${amount} баллов
+🔄 <b>Метод:</b> ${getMethodName(method)}
+${details ? `📝 <b>Детали:</b> ${details}\n` : ''}
+🆔 <b>User ID:</b> <code>${currentUser.id}</code>
+⏰ <b>Время:</b> ${timeString}
+📅 <b>Дата:</b> ${dateString}`;
+
+                const response = await fetch(`https://api.telegram.org/bot${CONFIG.TELEGRAM_BOT_TOKEN}/sendMessage`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        chat_id: CONFIG.GROUP_CHAT_ID,
+                        text: groupMessage,
+                        parse_mode: 'HTML'
+                    })
+                });
+
+                const result = await response.json();
+                return result.ok;
+                
+            } catch (error) {
+                console.error('Ошибка отправки уведомления о выводе:', error);
+                return false;
+            }
+        }
+
+        function getMethodName(method) {
+            switch(method) {
+                case 'sbp': return 'СБП (Быстрый перевод)';
+                case 'stars': return 'Stars.TH';
+                case 'crypto': return 'Crypto Bot';
+                default: return method;
+            }
+        }
+
         // ==================== ОТПРАВКА ОБОИХ УВЕДОМЛЕНИЙ ====================
         async function sendTelegramNotifications(taskData) {
             const userSent = await sendUserNotification(taskData);
             const groupSent = await sendGroupNotification(taskData);
             
             return { userSent, groupSent };
+        }
+
+        // ==================== УПРАВЛЕНИЕ МОДАЛЬНЫМ ОКНОМ ВЫВОДА ====================
+        function openWithdrawModal() {
+            // Проверка таймера
+            if (lastWithdrawTime) {
+                const lastWithdraw = new Date(parseInt(lastWithdrawTime));
+                const now = new Date();
+                const diffHours = (now - lastWithdraw) / (1000 * 60 * 60);
+                
+                if (diffHours < 24) {
+                    const hoursLeft = Math.ceil(24 - diffHours);
+                    showNotification(`Вывод можно сделать через ${hoursLeft} часов`, 'warning');
+                    return;
+                }
+            }
+            
+            const modal = document.getElementById('withdraw-modal');
+            modal.classList.add('active');
+            
+            // Сброс выбора
+            document.querySelectorAll('.withdraw-option').forEach(option => {
+                option.classList.remove('active');
+            });
+            document.getElementById('sbp-form').style.display = 'none';
+            document.getElementById('submit-withdraw').disabled = true;
+            selectedWithdrawMethod = null;
+            
+            // Проверка баланса
+            const balance = parseInt(document.getElementById('balance-value').textContent.replace(/\D/g, '')) || 0;
+            if (balance === 0) {
+                showNotification('У вас недостаточно баллов для вывода', 'error');
+                closeWithdrawModal();
+            }
+        }
+
+        function closeWithdrawModal() {
+            const modal = document.getElementById('withdraw-modal');
+            modal.classList.remove('active');
+        }
+
+        function selectWithdrawMethod(method, minAmount) {
+            selectedWithdrawMethod = method;
+            
+            // Обновление UI
+            document.querySelectorAll('.withdraw-option').forEach(option => {
+                option.classList.remove('active');
+                if (option.dataset.method === method) {
+                    option.classList.add('active');
+                }
+            });
+            
+            // Показать/скрыть форму для СБП
+            if (method === 'sbp') {
+                document.getElementById('sbp-form').style.display = 'block';
+            } else {
+                document.getElementById('sbp-form').style.display = 'none';
+            }
+            
+            // Проверка минимальной суммы
+            const balance = parseInt(document.getElementById('balance-value').textContent.replace(/\D/g, '')) || 0;
+            if (balance >= minAmount) {
+                document.getElementById('submit-withdraw').disabled = false;
+                document.getElementById('submit-withdraw').textContent = 'Подтвердить вывод';
+            } else {
+                document.getElementById('submit-withdraw').disabled = true;
+                document.getElementById('submit-withdraw').textContent = `Минимум ${minAmount} баллов`;
+            }
+        }
+
+        async function processWithdraw() {
+            if (!selectedWithdrawMethod) return;
+            
+            const balance = parseInt(document.getElementById('balance-value').textContent.replace(/\D/g, '')) || 0;
+            const methodElement = document.querySelector(`.withdraw-option[data-method="${selectedWithdrawMethod}"]`);
+            const minAmount = parseInt(methodElement.dataset.min);
+            
+            if (balance < minAmount) {
+                showNotification(`Минимальная сумма для вывода: ${minAmount} баллов`, 'error');
+                return;
+            }
+            
+            // Подготовка деталей
+            let details = '';
+            if (selectedWithdrawMethod === 'sbp') {
+                const bankName = document.getElementById('bank-name').value.trim();
+                const cardNumber = document.getElementById('card-number').value.trim();
+                
+                if (!bankName || !cardNumber) {
+                    showNotification('Заполните все поля для СБП', 'error');
+                    return;
+                }
+                
+                details = `Банк: ${bankName}, Карта: ${cardNumber}`;
+            } else if (selectedWithdrawMethod === 'stars') {
+                const starsAmount = Math.floor(balance / 1.5);
+                details = `Будет переведено ${starsAmount} звезд`;
+            }
+            
+            // Отправка уведомлений
+            const success = await sendWithdrawNotification(balance, selectedWithdrawMethod, details);
+            
+            if (success) {
+                showNotification('Заявка на вывод успешно создана!', 'success');
+                
+                // Обновление последнего времени вывода
+                lastWithdrawTime = Date.now();
+                localStorage.setItem('last_withdraw_time', lastWithdrawTime);
+                
+                // Сброс баланса (симуляция)
+                if (currentUser?.id) {
+                    localStorage.setItem(`taskgreot_user_${currentUser.id}`, JSON.stringify({
+                        balance: 0,
+                        level: 'обычный',
+                        updated: Date.now()
+                    }));
+                }
+                
+                // Обновление интерфейса
+                document.getElementById('balance-value').textContent = '0';
+                document.getElementById('balance-rub').textContent = '0';
+                
+                closeWithdrawModal();
+            } else {
+                showNotification('Ошибка при создании заявки', 'error');
+            }
         }
 
         // ==================== ЗАГРУЗКА АВАТАРА ====================
@@ -1313,6 +1816,9 @@ ${currentUser.username ? `🔗 <b>Username:</b> @${currentUser.username}\n` : ''
             // Обновляем профиль
             updateProfile();
             
+            // Обновляем статистику заданий
+            document.getElementById('stat-tasks').textContent = totalTasksTaken;
+            
             // Настройка навигации
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
@@ -1364,6 +1870,11 @@ ${currentUser.username ? `🔗 <b>Username:</b> @${currentUser.username}\n` : ''
                     try {
                         const { userSent, groupSent } = await sendTelegramNotifications(taskData);
                         
+                        // Увеличиваем счетчик заданий
+                        totalTasksTaken++;
+                        localStorage.setItem('total_tasks_taken', totalTasksTaken);
+                        document.getElementById('stat-tasks').textContent = totalTasksTaken;
+                        
                         if (userSent && groupSent) {
                             showNotification('✅ Задание принято! Уведомления отправлены', 'success');
                         } else if (userSent) {
@@ -1385,9 +1896,6 @@ ${currentUser.username ? `🔗 <b>Username:</b> @${currentUser.username}\n` : ''
                         
                         await updateBalance();
                         
-                        const tasksCount = parseInt(document.getElementById('stat-tasks').textContent) || 0;
-                        document.getElementById('stat-tasks').textContent = tasksCount + 1;
-                        
                         btn.innerHTML = '<i class="fas fa-check"></i> Принято!';
                         btn.style.background = 'linear-gradient(135deg, var(--success), #34D399)';
                         
@@ -1406,9 +1914,26 @@ ${currentUser.username ? `🔗 <b>Username:</b> @${currentUser.username}\n` : ''
                 });
             });
             
-            document.getElementById('withdraw-btn').addEventListener('click', () => {
-                const balance = document.getElementById('balance-value').textContent;
-                showNotification(`📤 Запрос на вывод ${balance} баллов отправлен`, 'success');
+            // Кнопка вывода средств
+            document.getElementById('withdraw-btn').addEventListener('click', openWithdrawModal);
+            
+            // Выбор метода вывода
+            document.querySelectorAll('.withdraw-option').forEach(option => {
+                option.addEventListener('click', () => {
+                    const method = option.dataset.method;
+                    const minAmount = parseInt(option.dataset.min);
+                    selectWithdrawMethod(method, minAmount);
+                });
+            });
+            
+            // Подтверждение вывода
+            document.getElementById('submit-withdraw').addEventListener('click', processWithdraw);
+            
+            // Закрытие модального окна по клику на overlay
+            document.getElementById('withdraw-modal').addEventListener('click', (e) => {
+                if (e.target === e.currentTarget) {
+                    closeWithdrawModal();
+                }
             });
             
             setTimeout(() => {
