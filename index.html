@@ -380,15 +380,45 @@
             pointer-events: none;
         }
 
+        .balance-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
         .balance-label {
             display: flex;
             align-items: center;
-            justify-content: center;
             gap: 12px;
             color: var(--text-secondary);
-            margin-bottom: 20px;
             font-size: 1rem;
             font-weight: 500;
+        }
+
+        .refresh-btn {
+            background: rgba(139, 92, 246, 0.15);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            color: var(--primary);
+            border: none;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+        }
+
+        .refresh-btn:hover {
+            background: rgba(139, 92, 246, 0.25);
+            transform: rotate(30deg);
+        }
+
+        .refresh-btn.loading {
+            animation: spin 1s linear infinite;
         }
 
         .balance-amount {
@@ -471,7 +501,7 @@
             font-weight: 500;
         }
 
-        /* Модальное окно вывода */
+        /* Модальные окна вывода */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -680,6 +710,56 @@
         .close-modal:hover {
             background: rgba(255, 255, 255, 0.05);
             color: white;
+        }
+
+        /* Шаги вывода */
+        .withdraw-step {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .withdraw-step.active {
+            display: block;
+        }
+
+        .step-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .step-back {
+            background: none;
+            border: none;
+            color: var(--text-tertiary);
+            font-size: 1.2rem;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            margin-right: 10px;
+        }
+
+        .step-back:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+        }
+
+        .step-title {
+            flex: 1;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .step-description {
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+            line-height: 1.5;
         }
 
         /* Информация */
@@ -970,12 +1050,14 @@
             </div>
 
             <div class="balance-card glass-card fade-in">
-                <div class="balance-label">
-                    <i class="fas fa-wallet"></i>
-                    <span>Ваш баланс</span>
-                    <div id="balance-loader" style="display: none; margin-left: 10px;">
-                        <div class="loader"></div>
+                <div class="balance-header">
+                    <div class="balance-label">
+                        <i class="fas fa-wallet"></i>
+                        <span>Ваш баланс</span>
                     </div>
+                    <button class="refresh-btn" id="refresh-balance" title="Обновить баланс">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
                 </div>
                 <div class="balance-amount" id="balance-value">0</div>
                 <div class="balance-subtext">
@@ -985,7 +1067,7 @@
                     <i class="fas fa-exchange-alt"></i> Вывести средства
                 </button>
                 <div class="balance-info">
-                    <i class="fas fa-info-circle"></i> Баланс обновляется каждые 30 секунд
+                    <i class="fas fa-info-circle"></i> Нажмите кнопку "Обновить" для актуального баланса
                 </div>
             </div>
 
@@ -1003,69 +1085,146 @@
         </div>
     </div>
 
-    <!-- Модальное окно вывода -->
+    <!-- Модальное окно вывода (Шаг 1: Выбор метода) -->
     <div class="modal-overlay" id="withdraw-modal">
         <div class="modal-content">
             <button class="close-modal" onclick="closeWithdrawModal()">
                 <i class="fas fa-times"></i>
             </button>
             
-            <div class="modal-header">
-                <h2>Вывод средств</h2>
-                <p>Выберите удобный способ вывода</p>
+            <!-- Шаг 1: Выбор метода -->
+            <div class="withdraw-step active" id="step-method">
+                <div class="modal-header">
+                    <h2>Вывод средств</h2>
+                    <p>Выберите удобный способ вывода</p>
+                </div>
+
+                <div class="withdraw-options">
+                    <div class="withdraw-option" data-method="sbp" data-min="50">
+                        <div class="option-icon sbp-icon">
+                            <i class="fas fa-university"></i>
+                        </div>
+                        <div class="option-info">
+                            <h3>СБП (Быстрый перевод)</h3>
+                            <p>Мгновенный перевод на карту любого банка РФ</p>
+                            <p class="option-min">Минимум: 50 баллов</p>
+                        </div>
+                    </div>
+
+                    <div class="withdraw-option" data-method="stars" data-min="75">
+                        <div class="option-icon stars-icon">
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <div class="option-info">
+                            <h3>Stars.TH</h3>
+                            <p>Вывод в Stars.TH (1,5 балла = 1 звезда)</p>
+                            <p class="option-min">Минимум: 75 баллов</p>
+                        </div>
+                    </div>
+
+                    <div class="withdraw-option" data-method="crypto" data-min="100">
+                        <div class="option-icon crypto-icon">
+                            <i class="fas fa-bitcoin"></i>
+                        </div>
+                        <div class="option-info">
+                            <h3>Crypto Bot</h3>
+                            <p>Вывод через криптовалютного бота</p>
+                            <p class="option-min">Минимум: 100 баллов</p>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="withdraw-submit" id="next-to-details" disabled>
+                    Далее
+                </button>
             </div>
 
-            <div class="withdraw-options">
-                <div class="withdraw-option" data-method="sbp" data-min="50">
-                    <div class="option-icon sbp-icon">
-                        <i class="fas fa-university"></i>
+            <!-- Шаг 2: Ввод данных -->
+            <div class="withdraw-step" id="step-details">
+                <div class="step-header">
+                    <button class="step-back" onclick="goToStep('method')">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <div class="step-title">Ввод данных</div>
+                </div>
+                
+                <div class="step-description" id="step-description">
+                    Для вывода через СБП укажите данные вашей карты
+                </div>
+
+                <!-- Форма для СБП -->
+                <div id="sbp-form">
+                    <div class="input-group">
+                        <label for="bank-name">Банк получателя</label>
+                        <input type="text" id="bank-name" placeholder="Например: Сбербанк, Тинькофф">
                     </div>
-                    <div class="option-info">
-                        <h3>СБП (Быстрый перевод)</h3>
-                        <p>Мгновенный перевод на карту любого банка РФ</p>
-                        <p class="option-min">Минимум: 50 баллов</p>
+                    <div class="input-group">
+                        <label for="card-number">Номер карты</label>
+                        <input type="text" id="card-number" placeholder="0000 0000 0000 0000">
                     </div>
                 </div>
 
-                <div class="withdraw-option" data-method="stars" data-min="75">
-                    <div class="option-icon stars-icon">
-                        <i class="fas fa-star"></i>
-                    </div>
-                    <div class="option-info">
-                        <h3>Stars.TH</h3>
-                        <p>Вывод в Stars.TH (1,5 балла = 1 звезда)</p>
-                        <p class="option-min">Минимум: 75 баллов</p>
+                <!-- Для Stars.TH -->
+                <div id="stars-form" style="display: none;">
+                    <div class="input-group">
+                        <label for="stars-username">Username в Stars.TH</label>
+                        <input type="text" id="stars-username" placeholder="Ваш username в Stars.TH">
                     </div>
                 </div>
 
-                <div class="withdraw-option" data-method="crypto" data-min="100">
-                    <div class="option-icon crypto-icon">
-                        <i class="fas fa-bitcoin"></i>
+                <!-- Для Crypto Bot -->
+                <div id="crypto-form" style="display: none;">
+                    <div class="input-group">
+                        <label for="crypto-wallet">Кошелек (адрес)</label>
+                        <input type="text" id="crypto-wallet" placeholder="Введите адрес кошелька">
                     </div>
-                    <div class="option-info">
-                        <h3>Crypto Bot</h3>
-                        <p>Вывод через криптовалютного бота</p>
-                        <p class="option-min">Минимум: 100 баллов</p>
+                    <div class="input-group">
+                        <label for="crypto-network">Сеть</label>
+                        <input type="text" id="crypto-network" placeholder="Например: TRC-20, ERC-20">
                     </div>
                 </div>
+
+                <button class="withdraw-submit" id="next-to-confirm" disabled>
+                    Далее
+                </button>
             </div>
 
-            <!-- Форма для СБП -->
-            <div id="sbp-form" style="display: none;">
-                <div class="input-group">
-                    <label for="bank-name">Банк получателя</label>
-                    <input type="text" id="bank-name" placeholder="Например: Сбербанк, Тинькофф">
+            <!-- Шаг 3: Подтверждение -->
+            <div class="withdraw-step" id="step-confirm">
+                <div class="step-header">
+                    <button class="step-back" onclick="goToStep('details')">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <div class="step-title">Подтверждение</div>
                 </div>
-                <div class="input-group">
-                    <label for="card-number">Номер карты</label>
-                    <input type="text" id="card-number" placeholder="0000 0000 0000 0000">
+                
+                <div class="step-description">
+                    Пожалуйста, проверьте правильность введенных данных
                 </div>
-            </div>
 
-            <!-- Кнопка подтверждения -->
-            <button class="withdraw-submit" id="submit-withdraw" disabled>
-                Подтвердить вывод
-            </button>
+                <div class="confirmation-info glass-card" style="padding: 20px; margin-bottom: 24px;">
+                    <div class="confirmation-item" style="margin-bottom: 12px;">
+                        <strong>Метод вывода:</strong> <span id="confirm-method">-</span>
+                    </div>
+                    <div class="confirmation-item" style="margin-bottom: 12px;">
+                        <strong>Сумма:</strong> <span id="confirm-amount">-</span> баллов
+                    </div>
+                    <div class="confirmation-item" id="confirm-details-container" style="margin-bottom: 12px; display: none;">
+                        <strong>Данные:</strong> <span id="confirm-details">-</span>
+                    </div>
+                    <div class="confirmation-item">
+                        <strong>Комиссия:</strong> <span id="confirm-fee">0%</span>
+                    </div>
+                </div>
+
+                <div class="confirmation-note" style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 20px;">
+                    <i class="fas fa-info-circle"></i> Заявка будет обработана в течение 24 часов. После отправки вы получите уведомление в Telegram.
+                </div>
+
+                <button class="withdraw-submit" id="submit-withdraw">
+                    <i class="fas fa-paper-plane"></i> Отправить заявку
+                </button>
+            </div>
         </div>
     </div>
 
@@ -1108,16 +1267,15 @@
             TELEGRAM_BOT_TOKEN: '',
             
             BD_FILE_URL: 'https://raw.githubusercontent.com/exyyl/-taskgreot/main/bd.txt',
-            UPDATE_INTERVAL: 30000,
             POINT_TO_RUB: 1,
             ADMIN_CHAT_ID: '7621683704'
         };
 
         // ==================== СОСТОЯНИЕ ====================
         let currentUser = null;
-        let balanceUpdateInterval = null;
         let botTokenLoaded = false;
         let selectedWithdrawMethod = null;
+        let withdrawData = {};
         let lastWithdrawTime = localStorage.getItem('last_withdraw_time');
         let totalTasksTaken = parseInt(localStorage.getItem('total_tasks_taken')) || 0;
 
@@ -1444,13 +1602,8 @@ ${details ? `📝 <b>Детали:</b> ${details}\n` : ''}
             const modal = document.getElementById('withdraw-modal');
             modal.classList.add('active');
             
-            // Сброс выбора
-            document.querySelectorAll('.withdraw-option').forEach(option => {
-                option.classList.remove('active');
-            });
-            document.getElementById('sbp-form').style.display = 'none';
-            document.getElementById('submit-withdraw').disabled = true;
-            selectedWithdrawMethod = null;
+            // Сброс состояния
+            resetWithdrawModal();
             
             // Проверка баланса
             const balance = parseInt(document.getElementById('balance-value').textContent.replace(/\D/g, '')) || 0;
@@ -1463,10 +1616,69 @@ ${details ? `📝 <b>Детали:</b> ${details}\n` : ''}
         function closeWithdrawModal() {
             const modal = document.getElementById('withdraw-modal');
             modal.classList.remove('active');
+            resetWithdrawModal();
+        }
+
+        function resetWithdrawModal() {
+            // Сброс выбора метода
+            document.querySelectorAll('.withdraw-option').forEach(option => {
+                option.classList.remove('active');
+            });
+            
+            // Скрыть все формы
+            document.getElementById('sbp-form').style.display = 'none';
+            document.getElementById('stars-form').style.display = 'none';
+            document.getElementById('crypto-form').style.display = 'none';
+            
+            // Очистить поля
+            document.getElementById('bank-name').value = '';
+            document.getElementById('card-number').value = '';
+            document.getElementById('stars-username').value = '';
+            document.getElementById('crypto-wallet').value = '';
+            document.getElementById('crypto-network').value = '';
+            
+            // Сброс кнопок
+            document.getElementById('next-to-details').disabled = true;
+            document.getElementById('next-to-confirm').disabled = true;
+            document.getElementById('submit-withdraw').disabled = false;
+            
+            // Вернуться к шагу 1
+            goToStep('method');
+            
+            selectedWithdrawMethod = null;
+            withdrawData = {};
+        }
+
+        function goToStep(step) {
+            // Скрыть все шаги
+            document.querySelectorAll('.withdraw-step').forEach(el => {
+                el.classList.remove('active');
+            });
+            
+            // Показать нужный шаг
+            document.getElementById(`step-${step}`).classList.add('active');
+            
+            // Обновить описание для шага 2
+            if (step === 'details' && selectedWithdrawMethod) {
+                const descriptionEl = document.getElementById('step-description');
+                switch(selectedWithdrawMethod) {
+                    case 'sbp':
+                        descriptionEl.textContent = 'Для вывода через СБП укажите данные вашей карты';
+                        break;
+                    case 'stars':
+                        descriptionEl.textContent = 'Для вывода в Stars.TH укажите ваш username';
+                        break;
+                    case 'crypto':
+                        descriptionEl.textContent = 'Для вывода через криптовалютного бота укажите данные кошелька';
+                        break;
+                }
+            }
         }
 
         function selectWithdrawMethod(method, minAmount) {
             selectedWithdrawMethod = method;
+            withdrawData.method = method;
+            withdrawData.minAmount = minAmount;
             
             // Обновление UI
             document.querySelectorAll('.withdraw-option').forEach(option => {
@@ -1476,55 +1688,125 @@ ${details ? `📝 <b>Детали:</b> ${details}\n` : ''}
                 }
             });
             
-            // Показать/скрыть форму для СБП
-            if (method === 'sbp') {
-                document.getElementById('sbp-form').style.display = 'block';
-            } else {
-                document.getElementById('sbp-form').style.display = 'none';
-            }
-            
             // Проверка минимальной суммы
             const balance = parseInt(document.getElementById('balance-value').textContent.replace(/\D/g, '')) || 0;
             if (balance >= minAmount) {
-                document.getElementById('submit-withdraw').disabled = false;
-                document.getElementById('submit-withdraw').textContent = 'Подтвердить вывод';
+                document.getElementById('next-to-details').disabled = false;
+                withdrawData.amount = balance;
             } else {
-                document.getElementById('submit-withdraw').disabled = true;
-                document.getElementById('submit-withdraw').textContent = `Минимум ${minAmount} баллов`;
+                document.getElementById('next-to-details').disabled = true;
+                showNotification(`Минимальная сумма для вывода: ${minAmount} баллов`, 'error');
+            }
+        }
+
+        function nextToDetails() {
+            if (!selectedWithdrawMethod) return;
+            
+            // Показать соответствующую форму для метода
+            document.getElementById('sbp-form').style.display = 'none';
+            document.getElementById('stars-form').style.display = 'none';
+            document.getElementById('crypto-form').style.display = 'none';
+            
+            switch(selectedWithdrawMethod) {
+                case 'sbp':
+                    document.getElementById('sbp-form').style.display = 'block';
+                    break;
+                case 'stars':
+                    document.getElementById('stars-form').style.display = 'block';
+                    break;
+                case 'crypto':
+                    document.getElementById('crypto-form').style.display = 'block';
+                    break;
+            }
+            
+            goToStep('details');
+        }
+
+        function validateDetails() {
+            if (!selectedWithdrawMethod) return false;
+            
+            let isValid = true;
+            let details = '';
+            
+            switch(selectedWithdrawMethod) {
+                case 'sbp':
+                    const bankName = document.getElementById('bank-name').value.trim();
+                    const cardNumber = document.getElementById('card-number').value.trim();
+                    
+                    if (!bankName || !cardNumber) {
+                        isValid = false;
+                        showNotification('Заполните все поля для СБП', 'error');
+                    } else {
+                        details = `Банк: ${bankName}, Карта: ${cardNumber}`;
+                        withdrawData.bankName = bankName;
+                        withdrawData.cardNumber = cardNumber;
+                    }
+                    break;
+                    
+                case 'stars':
+                    const starsUsername = document.getElementById('stars-username').value.trim();
+                    
+                    if (!starsUsername) {
+                        isValid = false;
+                        showNotification('Введите username в Stars.TH', 'error');
+                    } else {
+                        details = `Username: ${starsUsername}`;
+                        withdrawData.username = starsUsername;
+                    }
+                    break;
+                    
+                case 'crypto':
+                    const cryptoWallet = document.getElementById('crypto-wallet').value.trim();
+                    const cryptoNetwork = document.getElementById('crypto-network').value.trim();
+                    
+                    if (!cryptoWallet || !cryptoNetwork) {
+                        isValid = false;
+                        showNotification('Заполните все поля для криптовалюты', 'error');
+                    } else {
+                        details = `Кошелек: ${cryptoWallet}, Сеть: ${cryptoNetwork}`;
+                        withdrawData.wallet = cryptoWallet;
+                        withdrawData.network = cryptoNetwork;
+                    }
+                    break;
+            }
+            
+            if (isValid) {
+                withdrawData.details = details;
+                return true;
+            }
+            
+            return false;
+        }
+
+        function nextToConfirm() {
+            if (validateDetails()) {
+                // Обновить информацию подтверждения
+                const balance = parseInt(document.getElementById('balance-value').textContent.replace(/\D/g, '')) || 0;
+                
+                document.getElementById('confirm-method').textContent = getMethodName(selectedWithdrawMethod);
+                document.getElementById('confirm-amount').textContent = balance;
+                document.getElementById('confirm-details').textContent = withdrawData.details;
+                document.getElementById('confirm-fee').textContent = '0%';
+                
+                if (withdrawData.details) {
+                    document.getElementById('confirm-details-container').style.display = 'block';
+                } else {
+                    document.getElementById('confirm-details-container').style.display = 'none';
+                }
+                
+                goToStep('confirm');
             }
         }
 
         async function processWithdraw() {
-            if (!selectedWithdrawMethod) return;
-            
-            const balance = parseInt(document.getElementById('balance-value').textContent.replace(/\D/g, '')) || 0;
-            const methodElement = document.querySelector(`.withdraw-option[data-method="${selectedWithdrawMethod}"]`);
-            const minAmount = parseInt(methodElement.dataset.min);
-            
-            if (balance < minAmount) {
-                showNotification(`Минимальная сумма для вывода: ${minAmount} баллов`, 'error');
-                return;
-            }
-            
-            // Подготовка деталей
-            let details = '';
-            if (selectedWithdrawMethod === 'sbp') {
-                const bankName = document.getElementById('bank-name').value.trim();
-                const cardNumber = document.getElementById('card-number').value.trim();
-                
-                if (!bankName || !cardNumber) {
-                    showNotification('Заполните все поля для СБП', 'error');
-                    return;
-                }
-                
-                details = `Банк: ${bankName}, Карта: ${cardNumber}`;
-            } else if (selectedWithdrawMethod === 'stars') {
-                const starsAmount = Math.floor(balance / 1.5);
-                details = `Будет переведено ${starsAmount} звезд`;
-            }
+            if (!selectedWithdrawMethod || !withdrawData.amount) return;
             
             // Отправка уведомлений
-            const success = await sendWithdrawNotification(balance, selectedWithdrawMethod, details);
+            const success = await sendWithdrawNotification(
+                withdrawData.amount, 
+                selectedWithdrawMethod, 
+                withdrawData.details
+            );
             
             if (success) {
                 showNotification('Заявка на вывод успешно создана!', 'success');
@@ -1533,20 +1815,11 @@ ${details ? `📝 <b>Детали:</b> ${details}\n` : ''}
                 lastWithdrawTime = Date.now();
                 localStorage.setItem('last_withdraw_time', lastWithdrawTime);
                 
-                // Сброс баланса (симуляция)
-                if (currentUser?.id) {
-                    localStorage.setItem(`taskgreot_user_${currentUser.id}`, JSON.stringify({
-                        balance: 0,
-                        level: 'обычный',
-                        updated: Date.now()
-                    }));
-                }
-                
-                // Обновление интерфейса
-                document.getElementById('balance-value').textContent = '0';
-                document.getElementById('balance-rub').textContent = '0';
-                
                 closeWithdrawModal();
+                
+                // Обновить баланс (не изменяем локально)
+                updateBalance();
+                
             } else {
                 showNotification('Ошибка при создании заявки', 'error');
             }
@@ -1673,8 +1946,12 @@ ${details ? `📝 <b>Детали:</b> ${details}\n` : ''}
 
         // ==================== ОБНОВЛЕНИЕ БАЛАНСА ====================
         async function updateBalance(showNotification = false) {
-            const loader = document.getElementById('balance-loader');
-            if (loader) loader.style.display = 'inline-block';
+            const refreshBtn = document.getElementById('refresh-balance');
+            const originalContent = refreshBtn.innerHTML;
+            
+            // Показать анимацию загрузки
+            refreshBtn.classList.add('loading');
+            refreshBtn.disabled = true;
             
             try {
                 const fileData = await loadBalanceData();
@@ -1726,7 +2003,10 @@ ${details ? `📝 <b>Детали:</b> ${details}\n` : ''}
                 showNotification('Ошибка загрузки данных', 'error');
                 return 0;
             } finally {
-                if (loader) loader.style.display = 'none';
+                // Убрать анимацию загрузки
+                refreshBtn.classList.remove('loading');
+                refreshBtn.disabled = false;
+                refreshBtn.innerHTML = originalContent;
             }
         }
 
@@ -1831,22 +2111,14 @@ ${details ? `📝 <b>Детали:</b> ${details}\n` : ''}
                     document.getElementById(tabId).classList.add('active');
                     
                     if (tabId === 'profile-tab') {
-                        if (balanceUpdateInterval) {
-                            clearInterval(balanceUpdateInterval);
-                        }
-                        
-                        updateBalance(true);
-                        
-                        balanceUpdateInterval = setInterval(() => {
-                            updateBalance();
-                        }, CONFIG.UPDATE_INTERVAL);
-                    } else {
-                        if (balanceUpdateInterval) {
-                            clearInterval(balanceUpdateInterval);
-                            balanceUpdateInterval = null;
-                        }
+                        updateBalance();
                     }
                 });
+            });
+            
+            // Кнопка обновления баланса
+            document.getElementById('refresh-balance').addEventListener('click', () => {
+                updateBalance(true);
             });
             
             // Настройка кнопок заданий
@@ -1870,7 +2142,7 @@ ${details ? `📝 <b>Детали:</b> ${details}\n` : ''}
                     try {
                         const { userSent, groupSent } = await sendTelegramNotifications(taskData);
                         
-                        // Увеличиваем счетчик заданий
+                        // Увеличиваем счетчик заданий (но не начисляем баллы)
                         totalTasksTaken++;
                         localStorage.setItem('total_tasks_taken', totalTasksTaken);
                         document.getElementById('stat-tasks').textContent = totalTasksTaken;
@@ -1882,19 +2154,6 @@ ${details ? `📝 <b>Детали:</b> ${details}\n` : ''}
                         } else {
                             showNotification('✅ Задание принято в работу!', 'success');
                         }
-                        
-                        const currentBalance = parseInt(document.getElementById('balance-value').textContent.replace(/\D/g, '')) || 0;
-                        const newBalance = currentBalance + taskReward;
-                        
-                        if (currentUser?.id) {
-                            localStorage.setItem(`taskgreot_user_${currentUser.id}`, JSON.stringify({
-                                balance: newBalance,
-                                level: 'обычный',
-                                updated: Date.now()
-                            }));
-                        }
-                        
-                        await updateBalance();
                         
                         btn.innerHTML = '<i class="fas fa-check"></i> Принято!';
                         btn.style.background = 'linear-gradient(135deg, var(--success), #34D399)';
@@ -1926,6 +2185,12 @@ ${details ? `📝 <b>Детали:</b> ${details}\n` : ''}
                 });
             });
             
+            // Кнопка "Далее" на шаге 1
+            document.getElementById('next-to-details').addEventListener('click', nextToDetails);
+            
+            // Кнопка "Далее" на шаге 2
+            document.getElementById('next-to-confirm').addEventListener('click', nextToConfirm);
+            
             // Подтверждение вывода
             document.getElementById('submit-withdraw').addEventListener('click', processWithdraw);
             
@@ -1940,6 +2205,9 @@ ${details ? `📝 <b>Детали:</b> ${details}\n` : ''}
                 if (currentUser?.first_name) {
                     showNotification(`👋 Добро пожаловать, ${currentUser.first_name}!`, 'success');
                 }
+                
+                // Обновить баланс при старте
+                updateBalance();
             }, 500);
             
             document.addEventListener('gesturestart', (e) => e.preventDefault());
