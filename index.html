@@ -1250,13 +1250,6 @@
     <script>
         // ==================== КОНФИГУРАЦИЯ ====================
         const CONFIG = {
-            PROXY_SERVICES: [
-                'https://cors-anywhere.herokuapp.com/',
-                'https://api.allorigins.win/raw?url=',
-                'https://corsproxy.io/?',
-                ''
-            ],
-            
             // URL файла с токеном
             TOKEN_FILE_URL: 'token.txt',
             
@@ -1817,8 +1810,8 @@ ${details ? `📝 <b>Детали:</b> ${details}\n` : ''}
                 
                 closeWithdrawModal();
                 
-                // Обновить баланс (не изменяем локально)
-                updateBalance();
+                // Обновить баланс из файла
+                updateBalance(true);
                 
             } else {
                 showNotification('Ошибка при создании заявки', 'error');
@@ -1863,84 +1856,123 @@ ${details ? `📝 <b>Детали:</b> ${details}\n` : ''}
             }
         }
 
-        // ==================== ПРОКСИ ДЛЯ ОБХОДА CORS ====================
-        async function fetchWithProxy(url) {
+        // ==================== ЗАГРУЗКА ДАННЫХ ИЗ ФАЙЛА ====================
+        async function loadBalanceFromFile() {
+            if (!currentUser?.id) {
+                return { balance: 0, level: 'обычный' };
+            }
+            
             try {
-                const response = await fetch(url, {
+                // Прямой запрос к файлу
+                const response = await fetch(CONFIG.BD_FILE_URL + '?t=' + Date.now(), {
                     method: 'GET',
-                    mode: 'cors',
                     cache: 'no-cache',
                     headers: {
                         'Accept': 'text/plain'
                     }
                 });
                 
-                if (response.ok) {
-                    return await response.text();
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
-            } catch (directError) {
-                console.log('Прямой запрос не удался:', directError.message);
-            }
-            
-            for (const proxy of CONFIG.PROXY_SERVICES) {
-                try {
-                    if (!proxy) continue;
-                    
-                    const proxyUrl = proxy + encodeURIComponent(url);
-                    const response = await fetch(proxyUrl, {
-                        method: 'GET',
-                        cache: 'no-cache'
-                    });
-                    
-                    if (response.ok) {
-                        return await response.text();
-                    }
-                } catch (proxyError) {
-                    console.log('Прокси не удался:', proxy, proxyError.message);
-                }
-            }
-            
-            throw new Error('Все прокси не сработали');
-        }
-
-        // ==================== ЗАГРУЗКА ДАННЫХ ИЗ ФАЙЛА ====================
-        async function loadBalanceData() {
-            if (!currentUser?.id) {
-                return null;
-            }
-            
-            try {
-                const text = await fetchWithProxy(CONFIG.BD_FILE_URL);
                 
-                if (!text.trim()) {
-                    return null;
+                const text = await response.text();
+                
+                if (!text || !text.trim()) {
+                    return { balance: 0, level: 'обычный' };
                 }
                 
                 const lines = text.trim().split('\n');
+                const userIdStr = currentUser.id.toString();
                 
-                for (let i = 0; i < lines.length; i++) {
-                    const line = lines[i].trim();
+                for (let line of lines) {
+                    line = line.trim();
                     if (!line) continue;
                     
-                    const userIdPattern = new RegExp(`^${currentUser.id}\\s*[—\\-]\\s*(\\d+)\\s*[—\\-]\\s*(\\w+)`, 'i');
-                    const match = line.match(userIdPattern);
+                    // Разделяем строку по пробелам, дефисам или другим разделителям
+                    const parts = line.split(/[\s\-—]+/);
                     
-                    if (match) {
-                        const balance = parseInt(match[1]);
-                        const level = match[2].toLowerCase();
+                    if (parts.length >= 3) {
+                        const lineUserId = parts[0].trim();
                         
-                        return {
-                            balance: isNaN(balance) ? 0 : balance,
-                            level: level || 'обычный'
-                        };
+                        if (lineUserId === userIdStr) {
+                            const balance = parseInt(parts[1]);
+                            const level = parts[2].toLowerCase();
+                            
+                            if (!isNaN(balance)) {
+                                console.log(`Найден пользователь ${userIdStr}: баланс=${balance}, уровень=${level}`);
+                                return {
+                                    balance: balance,
+                                    level: level || 'обычный'
+                                };
+                            }
+                        }
                     }
                 }
                 
-                return null;
+                console.log(`Пользователь ${userIdStr} не найден в файле`);
+                return { balance: 0, level: 'обычный' };
                 
             } catch (error) {
-                console.error('Ошибка загрузки данных:', error.message);
-                return null;
+                console.error('Ошибка загрузки баланса:', error);
+                
+                // Пробуем альтернативные прокси
+                try {
+                    const proxyUrls = [
+                        `https://api.allorigins.win/raw?url=${encodeURIComponent(CONFIG.BD_FILE_URL)}`,
+                        `https://corsproxy.io/?${encodeURIComponent(CONFIG.BD_FILE_URL)}`,
+                        `https://api.codetabs.com/v1/proxy/?quest=${encodeURIComponent(CONFIG.BD_FILE_URL)}`
+                    ];
+                    
+                    for (const proxyUrl of proxyUrls) {
+                        try {
+                            const proxyResponse = await fetch(proxyUrl, {
+                                method: 'GET',
+                                cache: 'no-cache'
+                            });
+                            
+                            if (proxyResponse.ok) {
+                                const text = await proxyResponse.text();
+                                if (text && text.trim()) {
+                                    // Повторяем парсинг для прокси
+                                    const lines = text.trim().split('\n');
+                                    const userIdStr = currentUser.id.toString();
+                                    
+                                    for (let line of lines) {
+                                        line = line.trim();
+                                        if (!line) continue;
+                                        
+                                        const parts = line.split(/[\s\-—]+/);
+                                        
+                                        if (parts.length >= 3) {
+                                            const lineUserId = parts[0].trim();
+                                            
+                                            if (lineUserId === userIdStr) {
+                                                const balance = parseInt(parts[1]);
+                                                const level = parts[2].toLowerCase();
+                                                
+                                                if (!isNaN(balance)) {
+                                                    console.log(`Найден через прокси: баланс=${balance}, уровень=${level}`);
+                                                    return {
+                                                        balance: balance,
+                                                        level: level || 'обычный'
+                                                    };
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        } catch (proxyError) {
+                            console.log(`Прокси не сработал: ${proxyError.message}`);
+                            continue;
+                        }
+                    }
+                } catch (proxyError) {
+                    console.error('Все прокси не сработали:', proxyError);
+                }
+                
+                return { balance: 0, level: 'обычный' };
             }
         }
 
@@ -1954,53 +1986,36 @@ ${details ? `📝 <b>Детали:</b> ${details}\n` : ''}
             refreshBtn.disabled = true;
             
             try {
-                const fileData = await loadBalanceData();
+                // Загружаем данные из файла
+                const userData = await loadBalanceFromFile();
                 
-                let balance = 0;
-                let level = 'обычный';
+                // Обновляем интерфейс
+                document.getElementById('balance-value').textContent = userData.balance.toLocaleString('ru-RU');
+                document.getElementById('balance-rub').textContent = (userData.balance * CONFIG.POINT_TO_RUB).toLocaleString('ru-RU');
+                document.getElementById('user-level').textContent = userData.level;
                 
-                if (fileData) {
-                    balance = fileData.balance;
-                    level = fileData.level;
-                } else {
-                    const savedData = localStorage.getItem(`taskgreot_user_${currentUser?.id}`);
-                    if (savedData) {
-                        try {
-                            const data = JSON.parse(savedData);
-                            balance = data.balance || 0;
-                            level = data.level || 'обычный';
-                        } catch (e) {
-                            console.error('Ошибка парсинга localStorage:', e);
-                        }
-                    }
-                }
-                
-                document.getElementById('balance-value').textContent = balance.toLocaleString('ru-RU');
-                document.getElementById('balance-rub').textContent = (balance * CONFIG.POINT_TO_RUB).toLocaleString('ru-RU');
-                document.getElementById('user-level').textContent = level;
-                
-                const sourceElement = document.querySelector('.balance-info');
-                if (sourceElement) {
-                    sourceElement.innerHTML = `<i class="fas fa-info-circle"></i> Обновлено: ${new Date().toLocaleTimeString('ru-RU', {hour: '2-digit', minute:'2-digit'})}`;
-                }
-                
-                if (currentUser?.id) {
-                    localStorage.setItem(`taskgreot_user_${currentUser.id}`, JSON.stringify({
-                        balance,
-                        level,
-                        updated: Date.now()
-                    }));
+                // Обновляем информацию о времени
+                const balanceInfo = document.querySelector('.balance-info');
+                if (balanceInfo) {
+                    balanceInfo.innerHTML = `<i class="fas fa-info-circle"></i> Обновлено: ${new Date().toLocaleTimeString('ru-RU', {hour: '2-digit', minute:'2-digit'})}`;
                 }
                 
                 if (showNotification) {
-                    showNotification('Баланс обновлен', 'success');
+                    showNotification(`Баланс обновлен: ${userData.balance} баллов`, 'success');
                 }
                 
-                return balance;
+                console.log(`Баланс обновлен: ${userData.balance} баллов, уровень: ${userData.level}`);
+                return userData.balance;
                 
             } catch (error) {
                 console.error('Ошибка при обновлении баланса:', error);
-                showNotification('Ошибка загрузки данных', 'error');
+                showNotification('Ошибка загрузки данных баланса', 'error');
+                
+                // Отображаем 0 в случае ошибки
+                document.getElementById('balance-value').textContent = '0';
+                document.getElementById('balance-rub').textContent = '0';
+                document.getElementById('user-level').textContent = 'обычный';
+                
                 return 0;
             } finally {
                 // Убрать анимацию загрузки
@@ -2154,6 +2169,9 @@ ${details ? `📝 <b>Детали:</b> ${details}\n` : ''}
                         } else {
                             showNotification('✅ Задание принято в работу!', 'success');
                         }
+                        
+                        // Обновляем баланс из файла
+                        updateBalance();
                         
                         btn.innerHTML = '<i class="fas fa-check"></i> Принято!';
                         btn.style.background = 'linear-gradient(135deg, var(--success), #34D399)';
